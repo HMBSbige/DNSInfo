@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.27703.2035
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DNSInfo", "DNSInfo\DNSInfo.csproj", "{E1F23BF5-CF87-46C9-8666-7C4FAF39877C}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{E1F23BF5-CF87-46C9-8666-7C4FAF39877C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E1F23BF5-CF87-46C9-8666-7C4FAF39877C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E1F23BF5-CF87-46C9-8666-7C4FAF39877C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E1F23BF5-CF87-46C9-8666-7C4FAF39877C}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {E8735EC9-0938-410A-9459-F8CD35641541}
+	EndGlobalSection
+EndGlobal
