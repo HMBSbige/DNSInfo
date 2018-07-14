@@ -104,7 +104,7 @@ namespace DNSInfo
 						stopwatch.Start();
 						reponse = dns.Query(querystr, type);
 						stopwatch.Stop();
-						latency = Math.Round(stopwatch.ElapsedTicks / (double)Stopwatch.Frequency, 2);
+						latency = Math.Round(stopwatch.Elapsed.TotalMilliseconds, 2);
 					}
 				});
 				t.Start();
