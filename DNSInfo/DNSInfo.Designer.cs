@@ -72,14 +72,14 @@
 			// 
 			this.textBox2.Location = new System.Drawing.Point(95, 243);
 			this.textBox2.Name = "textBox2";
-			this.textBox2.Size = new System.Drawing.Size(100, 21);
+			this.textBox2.Size = new System.Drawing.Size(133, 21);
 			this.textBox2.TabIndex = 2;
-			this.textBox2.Text = "1.1.1.1";
+			this.textBox2.Text = "123.206.209.64:53";
 			// 
 			// checkBox1
 			// 
 			this.checkBox1.AutoSize = true;
-			this.checkBox1.Location = new System.Drawing.Point(201, 248);
+			this.checkBox1.Location = new System.Drawing.Point(234, 245);
 			this.checkBox1.Name = "checkBox1";
 			this.checkBox1.Size = new System.Drawing.Size(72, 16);
 			this.checkBox1.TabIndex = 3;
@@ -110,14 +110,12 @@
 			this.comboBox1.FormattingEnabled = true;
 			this.comboBox1.Items.AddRange(new object[] {
             "IPv4 host address (A)",
+            "IPv6 host address (AAAA)",
             "Name server (NS)",
             "Canonical name (CNAME)",
-            "Start of authority (SOA)",
             "Domain name pointer (PTR)",
-            "Domain name pointer (HINFO)",
             "Mail exchange (MX)",
             "Text entries (TXT)",
-            "IPv6 host address (AAAA)",
             "Any record (ANY)"});
 			this.comboBox1.Location = new System.Drawing.Point(279, 270);
 			this.comboBox1.Name = "comboBox1";
@@ -152,7 +150,6 @@
 			this.Name = "DNSInfo";
 			this.ShowIcon = false;
 			this.Text = "DNSInfo";
-			this.Resize += new System.EventHandler(this.DNSInfo_Resize);
 			this.statusStrip1.ResumeLayout(false);
 			this.statusStrip1.PerformLayout();
 			this.ResumeLayout(false);
