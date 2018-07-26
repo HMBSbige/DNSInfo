@@ -7,21 +7,14 @@ namespace DNSInfo
 	{
 		public static IPAddress PTRName2IP(string str)
 		{
-			var s = str.Split(new[] {'.'}, StringSplitOptions.RemoveEmptyEntries);
+			var s = str.Split(new[] { '.' }, StringSplitOptions.RemoveEmptyEntries);
 			return IPAddress.Parse($@"{s[3]}.{s[2]}.{s[1]}.{s[0]}");
 		}
 
-		public static IPEndPoint String2IPEndPoint(string str)
+		public static IPEndPoint String2IPEndPoint(string strip, int port)
 		{
-			if (str == null)
-			{
-				return null;
-			}
-
-			var s = str.Split(':');
-			var ip = IPAddress.Parse(s[0]);
-			var port = Convert.ToInt32(s[1]);
-			return new IPEndPoint(ip, port);
+			var ip = IPAddress.Parse(strip);
+			return new IPEndPoint(ip,port);
 		}
 	}
 }

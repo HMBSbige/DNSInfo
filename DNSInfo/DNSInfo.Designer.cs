@@ -32,12 +32,13 @@
 			this.statusStrip1 = new System.Windows.Forms.StatusStrip();
 			this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
 			this.textBox2 = new System.Windows.Forms.TextBox();
-			this.checkBox1 = new System.Windows.Forms.CheckBox();
 			this.textBox3 = new System.Windows.Forms.TextBox();
 			this.button1 = new System.Windows.Forms.Button();
 			this.comboBox1 = new System.Windows.Forms.ComboBox();
 			this.label1 = new System.Windows.Forms.Label();
+			this.numericUpDown1 = new System.Windows.Forms.NumericUpDown();
 			this.statusStrip1.SuspendLayout();
+			((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).BeginInit();
 			this.SuspendLayout();
 			// 
 			// textBox1
@@ -72,19 +73,9 @@
 			// 
 			this.textBox2.Location = new System.Drawing.Point(95, 243);
 			this.textBox2.Name = "textBox2";
-			this.textBox2.Size = new System.Drawing.Size(133, 21);
+			this.textBox2.Size = new System.Drawing.Size(97, 21);
 			this.textBox2.TabIndex = 2;
-			this.textBox2.Text = "123.206.209.64:53";
-			// 
-			// checkBox1
-			// 
-			this.checkBox1.AutoSize = true;
-			this.checkBox1.Location = new System.Drawing.Point(234, 245);
-			this.checkBox1.Name = "checkBox1";
-			this.checkBox1.Size = new System.Drawing.Size(72, 16);
-			this.checkBox1.TabIndex = 3;
-			this.checkBox1.Text = "缓存结果";
-			this.checkBox1.UseVisualStyleBackColor = true;
+			this.textBox2.Text = "101.6.6.6";
 			// 
 			// textBox3
 			// 
@@ -131,17 +122,39 @@
 			this.label1.TabIndex = 7;
 			this.label1.Text = "DNS 服务器：";
 			// 
+			// numericUpDown1
+			// 
+			this.numericUpDown1.Location = new System.Drawing.Point(198, 243);
+			this.numericUpDown1.Maximum = new decimal(new int[] {
+            65535,
+            0,
+            0,
+            0});
+			this.numericUpDown1.Minimum = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
+			this.numericUpDown1.Name = "numericUpDown1";
+			this.numericUpDown1.Size = new System.Drawing.Size(52, 21);
+			this.numericUpDown1.TabIndex = 8;
+			this.numericUpDown1.Value = new decimal(new int[] {
+            53,
+            0,
+            0,
+            0});
+			// 
 			// DNSInfo
 			// 
 			this.AcceptButton = this.button1;
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(561, 324);
+			this.Controls.Add(this.numericUpDown1);
 			this.Controls.Add(this.label1);
 			this.Controls.Add(this.comboBox1);
 			this.Controls.Add(this.button1);
 			this.Controls.Add(this.textBox3);
-			this.Controls.Add(this.checkBox1);
 			this.Controls.Add(this.textBox2);
 			this.Controls.Add(this.statusStrip1);
 			this.Controls.Add(this.textBox1);
@@ -152,6 +165,7 @@
 			this.Text = "DNSInfo";
 			this.statusStrip1.ResumeLayout(false);
 			this.statusStrip1.PerformLayout();
+			((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).EndInit();
 			this.ResumeLayout(false);
 			this.PerformLayout();
 
@@ -163,11 +177,11 @@
 		private System.Windows.Forms.StatusStrip statusStrip1;
 		private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel1;
 		private System.Windows.Forms.TextBox textBox2;
-		private System.Windows.Forms.CheckBox checkBox1;
 		private System.Windows.Forms.TextBox textBox3;
 		private System.Windows.Forms.Button button1;
 		private System.Windows.Forms.ComboBox comboBox1;
 		private System.Windows.Forms.Label label1;
+		private System.Windows.Forms.NumericUpDown numericUpDown1;
 	}
 }
 

@@ -1,9 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
+using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using DNS.Client;
@@ -24,29 +24,28 @@ namespace DNSInfo
 
 		private delegate void VoidMethodDelegate();
 
-		private const string Statushead = @"服务器响应：";
+		private const string ResponseHead = @"服务器响应：";
+		private const string NoResponse = @"服务器未响应！";
 
-		private string str;
-
-		private void EnableAll()
+		private void EnableAllControl()
 		{
 			button1.Enabled = true;
 			comboBox1.Enabled = true;
 			textBox2.Enabled = true;
 			textBox3.Enabled = true;
-			checkBox1.Enabled = true;
+			numericUpDown1.Enabled = true;
 		}
 
-		private void DisableAll()
+		private void DisableAllControl()
 		{
 			button1.Enabled = false;
 			comboBox1.Enabled = false;
 			textBox2.Enabled = false;
 			textBox3.Enabled = false;
-			checkBox1.Enabled = false;
+			numericUpDown1.Enabled = false;
 		}
 
-		private RecordType GetType()
+		private RecordType GetRecordType()
 		{
 			RecordType type;
 			if (comboBox1.SelectedIndex == 0)
@@ -89,20 +88,83 @@ namespace DNSInfo
 			return type;
 		}
 
-		private async Task<IResponse> Query(IPEndPoint dns, string querystr, RecordType type)
+		private IRequest GetRequest(IPEndPoint dns, RecordType type, string querystr)
 		{
 			var request = new ClientRequest(dns);
 			request.Questions.Add(new Question(Domain.FromString(querystr), type));
 			request.RecursionDesired = true;
+			return request;
+		}
 
+		private static string Response2String(IResponse response, IRequest request, IPEndPoint dns)
+		{
+			if (response == null)
+			{
+				Debug.WriteLine(@"无响应");
+				return null;
+			}
 			IResponse res = Response.FromRequest(request);
-			var question = res.Questions[0];
+			var resStr = new StringBuilder();
+			foreach (var question in res.Questions)
+			{
+				var records = response.AnswerRecords;
+				string str;
 
+				if (records.Count == 0)
+				{
+					str = $@"DNS query {question.Name} no answer via {dns}";
+					Debug.WriteLine(str);
+					Console.WriteLine(str);
+					resStr.AppendLine(str);
+				}
+				else
+				{
+					foreach (var record in records)
+					{
+						if (record.Type == RecordType.A || record.Type == RecordType.AAAA)
+						{
+							var iprecord = (IPAddressResourceRecord)record;
+							str = $@"DNS query {question.Name} answer {iprecord.IPAddress} via {dns}";
+							Debug.WriteLine(str);
+							Console.WriteLine(str);
+							resStr.AppendLine(str);
+						}
+						else if (record.Type == RecordType.CNAME)
+						{
+							var cnamerecord = (CanonicalNameResourceRecord)record;
+							str = $@"DNS query {question.Name} answer {cnamerecord.CanonicalDomainName} via {dns}";
+							Debug.WriteLine(str);
+							Console.WriteLine(str);
+							resStr.AppendLine(str);
+						}
+						else if (record.Type == RecordType.PTR)
+						{
+							var ptrrecord = (PointerResourceRecord)record;
+							str = $@"DNS query {Common.PTRName2IP(question.Name.ToString())} answer {ptrrecord.PointerDomainName} via {dns}";
+							Debug.WriteLine(str);
+							Console.WriteLine(str);
+							resStr.AppendLine(str);
+						}
+						else
+						{
+							str = $@"DNS query {question.Name} {record.Type} via {dns}";
+							Debug.WriteLine(str);
+							Console.WriteLine(str);
+							resStr.AppendLine(str);
+						}
+					}
+				}
+			}
+			return resStr.ToString();
+		}
+
+		private async Task<IResponse> Query(IPEndPoint dns, IRequest request, int timeout = 5000)
+		{
 			using (var udp = new UdpClient())
 			{
-				await udp.SendAsync(request.ToArray(), request.Size, dns).WithCancellationTimeout(5000);
+				await udp.SendAsync(request.ToArray(), request.Size, dns).WithCancellationTimeout(timeout);
 
-				var result = await udp.ReceiveAsync().WithCancellationTimeout(5000);
+				var result = await udp.ReceiveAsync().WithCancellationTimeout(timeout);
 
 				if (!result.RemoteEndPoint.Equals(dns))
 				{
@@ -115,76 +177,68 @@ namespace DNSInfo
 				{
 					return await new NullRequestResolver().Resolve(request);
 				}
-				var re = new ClientResponse(request, response, buffer);
-
-				var records = re.AnswerRecords;
-				if (records.Count == 0)
-				{
-					Debug.WriteLine($@"DNS query {question.Name} no answer via {dns}");
-					Console.WriteLine($@"DNS query {question.Name} no answer via {dns}");
-				}
-				else
-				{
-					foreach (var record in records)
-					{
-						if (record.Type == RecordType.A || record.Type == RecordType.AAAA)
-						{
-							var iprecord = (IPAddressResourceRecord)record;
-							Debug.WriteLine($@"DNS query {question.Name} answer {iprecord.IPAddress} via {dns}");
-							Console.WriteLine($@"DNS query {question.Name} answer {iprecord.IPAddress} via {dns}");
-						}
-						else if (record.Type == RecordType.CNAME)
-						{
-							var cnamerecord = (CanonicalNameResourceRecord)record;
-							Debug.WriteLine($@"DNS query {question.Name} answer {cnamerecord.CanonicalDomainName} via {dns}");
-							Console.WriteLine($@"DNS query {question.Name} answer {cnamerecord.CanonicalDomainName} via {dns}");
-						}
-						else if (record.Type == RecordType.PTR)
-						{
-							var ptrrecord = (PointerResourceRecord)record;
-							Debug.WriteLine($@"DNS query {Common.PTRName2IP(question.Name.ToString())} answer {ptrrecord.PointerDomainName} via {dns}");
-							Console.WriteLine($@"DNS query {Common.PTRName2IP(question.Name.ToString())} answer {ptrrecord.PointerDomainName} via {dns}");
-						}
-						else
-						{
-							Debug.WriteLine($@"DNS query {question.Name} {record.Type} via {dns}");
-							Console.WriteLine($@"DNS query {question.Name} {record.Type} via {dns}");
-						}
-					}
-				}
-				return re;
+				var clientResponse = new ClientResponse(request, response, buffer);
+				_iResponse = clientResponse;
+				return clientResponse;
 			}
 		}
 
+		private IResponse _iResponse = null;
 		private void button1_Click(object sender, EventArgs e)
 		{
 			try
 			{
-				DisableAll();
+				DisableAllControl();
 				textBox1.Text = string.Empty;
 				var querystr = textBox3.Text;
-				var type = GetType();
-				var dns = Common.String2IPEndPoint(textBox2.Text);
+				var type = GetRecordType();
+				var dns = Common.String2IPEndPoint(textBox2.Text, Convert.ToInt32(numericUpDown1.Value));
 
-				var text = string.Empty;
+				string text;
+				double latency;
+				var request = GetRequest(dns, type, querystr);
+				var istimeout = false;
+
+				var stopwatch = new Stopwatch();
+				stopwatch.Start();
 				var t = new Task(() =>
 				{
-					Query(dns, querystr, type).Wait();
+					try
+					{
+						Query(dns, request).Wait();
+					}
+					catch
+					{
+						istimeout = true;
+					}
+
 				});
 				t.Start();
 				t.ContinueWith(task =>
 				{
 					BeginInvoke(new VoidMethodDelegate(() =>
 					{
-						textBox1.Text = str;
-						EnableAll();
+						stopwatch.Stop();
+						if (istimeout)
+						{
+							text=string.Empty;
+							toolStripStatusLabel1.Text = $@"{NoResponse}";
+						}
+						else
+						{
+							latency = Math.Round(stopwatch.Elapsed.TotalMilliseconds, 2);
+							text = Response2String(_iResponse, request, dns);
+							toolStripStatusLabel1.Text = $@"{ResponseHead}({latency}ms)";
+						}
+						textBox1.Text = text;
+						EnableAllControl();
 					}));
 				});
 			}
 			catch (Exception ex)
 			{
 				MessageBox.Show(this, @"错误：" + ex.Message, @"错误：", MessageBoxButtons.OK, MessageBoxIcon.Error);
-				EnableAll();
+				EnableAllControl();
 			}
 		}
 	}
