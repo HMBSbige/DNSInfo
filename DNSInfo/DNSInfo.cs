@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Net;
@@ -33,7 +34,6 @@ namespace DNSInfo
 			comboBox1.Enabled = true;
 			textBox2.Enabled = true;
 			textBox3.Enabled = true;
-			numericUpDown1.Enabled = true;
 		}
 
 		private void DisableAllControl()
@@ -42,7 +42,6 @@ namespace DNSInfo
 			comboBox1.Enabled = false;
 			textBox2.Enabled = false;
 			textBox3.Enabled = false;
-			numericUpDown1.Enabled = false;
 		}
 
 		private RecordType GetRecordType()
@@ -192,47 +191,71 @@ namespace DNSInfo
 				textBox1.Text = string.Empty;
 				var querystr = textBox3.Text;
 				var type = GetRecordType();
-				var dns = Common.String2IPEndPoint(textBox2.Text, Convert.ToInt32(numericUpDown1.Value));
+				var dnsS = Common.ToIPEndPoints(textBox2.Text, 53, new[] { ',' }) as IPEndPoint[];
 
-				string text;
-				double latency;
-				var request = GetRequest(dns, type, querystr);
-				var istimeout = false;
-
-				var stopwatch = new Stopwatch();
-				stopwatch.Start();
-				var t = new Task(() =>
+				var T = new Task(() =>
 				{
-					try
+					foreach (var dns in dnsS)
 					{
-						Query(dns, request).Wait();
-					}
-					catch
-					{
-						istimeout = true;
-					}
+						var isover = false;
+						string text;
+						double latency;
+						var request = GetRequest(dns, type, querystr);
+						var istimeout = false;
 
+						var stopwatch = new Stopwatch();
+						stopwatch.Start();
+						var t = new Task(() =>
+						{
+							try
+							{
+								Query(dns, request).Wait();
+							}
+							catch
+							{
+								istimeout = true;
+							}
+
+						});
+						t.Start();
+						t.ContinueWith(task =>
+						{
+							BeginInvoke(new VoidMethodDelegate(() =>
+							{
+								stopwatch.Stop();
+								if (istimeout)
+								{
+									text = string.Empty;
+									toolStripStatusLabel1.Text = $@"{NoResponse}";
+								}
+								else
+								{
+									latency = Math.Round(stopwatch.Elapsed.TotalMilliseconds, 2);
+									text = Response2String(_iResponse, request, dns);
+									if (text != null)
+									{
+										isover = true;
+									}
+									toolStripStatusLabel1.Text = $@"{ResponseHead}({latency}ms)";
+								}
+
+								textBox1.Text += text;
+							}));
+						});
+						if (isover)
+						{
+							break;
+						}
+					}
 				});
-				t.Start();
-				t.ContinueWith(task =>
+				T.Start();
+				T.ContinueWith(task =>
 				{
 					BeginInvoke(new VoidMethodDelegate(() =>
 					{
-						stopwatch.Stop();
-						if (istimeout)
-						{
-							text=string.Empty;
-							toolStripStatusLabel1.Text = $@"{NoResponse}";
-						}
-						else
-						{
-							latency = Math.Round(stopwatch.Elapsed.TotalMilliseconds, 2);
-							text = Response2String(_iResponse, request, dns);
-							toolStripStatusLabel1.Text = $@"{ResponseHead}({latency}ms)";
-						}
-						textBox1.Text = text;
 						EnableAllControl();
 					}));
+					
 				});
 			}
 			catch (Exception ex)

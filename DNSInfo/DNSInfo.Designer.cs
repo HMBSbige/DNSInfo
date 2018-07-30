@@ -36,9 +36,7 @@
 			this.button1 = new System.Windows.Forms.Button();
 			this.comboBox1 = new System.Windows.Forms.ComboBox();
 			this.label1 = new System.Windows.Forms.Label();
-			this.numericUpDown1 = new System.Windows.Forms.NumericUpDown();
 			this.statusStrip1.SuspendLayout();
-			((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).BeginInit();
 			this.SuspendLayout();
 			// 
 			// textBox1
@@ -73,9 +71,9 @@
 			// 
 			this.textBox2.Location = new System.Drawing.Point(95, 243);
 			this.textBox2.Name = "textBox2";
-			this.textBox2.Size = new System.Drawing.Size(97, 21);
+			this.textBox2.Size = new System.Drawing.Size(452, 21);
 			this.textBox2.TabIndex = 2;
-			this.textBox2.Text = "101.6.6.6";
+			this.textBox2.Text = "123.206.209.64:53,47.100.97.249:53";
 			// 
 			// textBox3
 			// 
@@ -83,7 +81,7 @@
 			this.textBox3.Name = "textBox3";
 			this.textBox3.Size = new System.Drawing.Size(259, 21);
 			this.textBox3.TabIndex = 4;
-			this.textBox3.Text = "www.google.com";
+			this.textBox3.Text = "test.bige0.com";
 			// 
 			// button1
 			// 
@@ -122,35 +120,12 @@
 			this.label1.TabIndex = 7;
 			this.label1.Text = "DNS 服务器：";
 			// 
-			// numericUpDown1
-			// 
-			this.numericUpDown1.Location = new System.Drawing.Point(198, 243);
-			this.numericUpDown1.Maximum = new decimal(new int[] {
-            65535,
-            0,
-            0,
-            0});
-			this.numericUpDown1.Minimum = new decimal(new int[] {
-            1,
-            0,
-            0,
-            0});
-			this.numericUpDown1.Name = "numericUpDown1";
-			this.numericUpDown1.Size = new System.Drawing.Size(52, 21);
-			this.numericUpDown1.TabIndex = 8;
-			this.numericUpDown1.Value = new decimal(new int[] {
-            53,
-            0,
-            0,
-            0});
-			// 
 			// DNSInfo
 			// 
 			this.AcceptButton = this.button1;
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(561, 324);
-			this.Controls.Add(this.numericUpDown1);
 			this.Controls.Add(this.label1);
 			this.Controls.Add(this.comboBox1);
 			this.Controls.Add(this.button1);
@@ -165,7 +140,6 @@
 			this.Text = "DNSInfo";
 			this.statusStrip1.ResumeLayout(false);
 			this.statusStrip1.PerformLayout();
-			((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).EndInit();
 			this.ResumeLayout(false);
 			this.PerformLayout();
 
@@ -181,7 +155,6 @@
 		private System.Windows.Forms.Button button1;
 		private System.Windows.Forms.ComboBox comboBox1;
 		private System.Windows.Forms.Label label1;
-		private System.Windows.Forms.NumericUpDown numericUpDown1;
 	}
 }
 
