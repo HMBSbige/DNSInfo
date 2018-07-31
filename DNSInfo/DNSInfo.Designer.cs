@@ -73,7 +73,7 @@
 			this.textBox2.Name = "textBox2";
 			this.textBox2.Size = new System.Drawing.Size(452, 21);
 			this.textBox2.TabIndex = 2;
-			this.textBox2.Text = "123.206.209.64:53,47.100.97.249:53";
+			this.textBox2.Text = "208.67.220.220:443,208.67.222.222:5353";
 			// 
 			// textBox3
 			// 
@@ -81,7 +81,7 @@
 			this.textBox3.Name = "textBox3";
 			this.textBox3.Size = new System.Drawing.Size(259, 21);
 			this.textBox3.TabIndex = 4;
-			this.textBox3.Text = "test.bige0.com";
+			this.textBox3.Text = "www.google.com";
 			// 
 			// button1
 			// 

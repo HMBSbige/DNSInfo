@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Net;
@@ -27,6 +26,9 @@ namespace DNSInfo
 
 		private const string ResponseHead = @"服务器响应：";
 		private const string NoResponse = @"服务器未响应！";
+		private const string ResponseTimeout = @"服务器响应超时！";
+		private const string DnsServerError = @"DNS 服务器格式错误！";
+		private const int DefaultTimeout = 1000;
 
 		private void EnableAllControl()
 		{
@@ -99,8 +101,10 @@ namespace DNSInfo
 		{
 			if (response == null)
 			{
-				Debug.WriteLine(@"无响应");
-				return null;
+				var str = $@"*No Response from {dns}";
+				Debug.WriteLine(str);
+				Console.WriteLine(str);
+				return str;
 			}
 			IResponse res = Response.FromRequest(request);
 			var resStr = new StringBuilder();
@@ -111,7 +115,7 @@ namespace DNSInfo
 
 				if (records.Count == 0)
 				{
-					str = $@"DNS query {question.Name} no answer via {dns}";
+					str = $@"*DNS query {question.Name} no answer via {dns}";
 					Debug.WriteLine(str);
 					Console.WriteLine(str);
 					resStr.AppendLine(str);
@@ -157,7 +161,7 @@ namespace DNSInfo
 			return resStr.ToString();
 		}
 
-		private async Task<IResponse> Query(IPEndPoint dns, IRequest request, int timeout = 5000)
+		private async Task<IResponse> Query(IPEndPoint dns, IRequest request, int timeout = DefaultTimeout)
 		{
 			using (var udp = new UdpClient())
 			{
@@ -191,71 +195,71 @@ namespace DNSInfo
 				textBox1.Text = string.Empty;
 				var querystr = textBox3.Text;
 				var type = GetRecordType();
-				var dnsS = Common.ToIPEndPoints(textBox2.Text, 53, new[] { ',' }) as IPEndPoint[];
-
-				var T = new Task(() =>
+				var dnsS = Common.ToIPEndPoints(textBox2.Text, 53, new[] { ',' ,'，'}) as IPEndPoint[];
+				if (dnsS.Length == 0)
+				{
+					throw new Exception(DnsServerError);
+				}
+				var text = string.Empty;
+				var latency = 0.0;
+				var t = new Task(() =>
 				{
 					foreach (var dns in dnsS)
 					{
 						var isover = false;
-						string text;
-						double latency;
 						var request = GetRequest(dns, type, querystr);
 						var istimeout = false;
 
 						var stopwatch = new Stopwatch();
 						stopwatch.Start();
-						var t = new Task(() =>
+						try
 						{
-							try
-							{
-								Query(dns, request).Wait();
-							}
-							catch
-							{
-								istimeout = true;
-							}
-
-						});
-						t.Start();
-						t.ContinueWith(task =>
+							Query(dns, request).Wait();
+						}
+						catch
 						{
-							BeginInvoke(new VoidMethodDelegate(() =>
+							istimeout = true;
+						}
+						stopwatch.Stop();
+						if (istimeout)
+						{
+							text = string.Empty;
+						}
+						else
+						{
+							latency += stopwatch.Elapsed.TotalMilliseconds;
+							text = Response2String(_iResponse, request, dns);
+							if (text[0] != '*')
 							{
-								stopwatch.Stop();
-								if (istimeout)
-								{
-									text = string.Empty;
-									toolStripStatusLabel1.Text = $@"{NoResponse}";
-								}
-								else
-								{
-									latency = Math.Round(stopwatch.Elapsed.TotalMilliseconds, 2);
-									text = Response2String(_iResponse, request, dns);
-									if (text != null)
-									{
-										isover = true;
-									}
-									toolStripStatusLabel1.Text = $@"{ResponseHead}({latency}ms)";
-								}
-
-								textBox1.Text += text;
-							}));
-						});
+								isover = true;
+							}
+						}
 						if (isover)
 						{
 							break;
 						}
 					}
 				});
-				T.Start();
-				T.ContinueWith(task =>
+				t.Start();
+				t.ContinueWith(task =>
 				{
 					BeginInvoke(new VoidMethodDelegate(() =>
 					{
+						if (text.StartsWith(@"*No Response"))
+						{
+							toolStripStatusLabel1.Text = $@"{NoResponse}";
+						}
+						else if (string.IsNullOrWhiteSpace(text))
+						{
+							toolStripStatusLabel1.Text = $@"{ResponseTimeout}";
+						}
+						else
+						{
+							toolStripStatusLabel1.Text = $@"{ResponseHead}({Math.Round(latency, 2)}ms)";
+							textBox1.Text += text;
+						}
 						EnableAllControl();
 					}));
-					
 				});
 			}
 			catch (Exception ex)
