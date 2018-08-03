@@ -59,27 +59,11 @@ namespace DNSInfo
 			}
 			else if (comboBox1.SelectedIndex == 2)
 			{
-				type = RecordType.NS;
+				type = RecordType.CNAME;
 			}
 			else if (comboBox1.SelectedIndex == 3)
 			{
-				type = RecordType.CNAME;
-			}
-			else if (comboBox1.SelectedIndex == 4)
-			{
 				type = RecordType.PTR;
-			}
-			else if (comboBox1.SelectedIndex == 5)
-			{
-				type = RecordType.MX;
-			}
-			else if (comboBox1.SelectedIndex == 6)
-			{
-				type = RecordType.TXT;
-			}
-			else if (comboBox1.SelectedIndex == 7)
-			{
-				type = RecordType.ANY;
 			}
 			else
 			{
@@ -97,7 +81,7 @@ namespace DNSInfo
 			return request;
 		}
 
-		private static string Response2String(IResponse response, IRequest request, IPEndPoint dns)
+		private static string Response2String(IResponse response, IPEndPoint dns)
 		{
 			if (response == null)
 			{
@@ -106,16 +90,22 @@ namespace DNSInfo
 				Console.WriteLine(str);
 				return str;
 			}
-			IResponse res = Response.FromRequest(request);
 			var resStr = new StringBuilder();
-			foreach (var question in res.Questions)
+			foreach (var question in response.Questions)
 			{
 				var records = response.AnswerRecords;
 				string str;
 
 				if (records.Count == 0)
 				{
-					str = $@"*DNS query {question.Name} no answer via {dns}";
+					if (question.Type == RecordType.PTR)
+					{
+						str = $@"*DNS query {Common.PTRName2IP(question.Name.ToString())} no answer via {dns}";
+					}
+					else
+					{
+						str = $@"*DNS query {question.Name} no answer via {dns}";
+					}
 					Debug.WriteLine(str);
 					Console.WriteLine(str);
 					resStr.AppendLine(str);
@@ -181,12 +171,12 @@ namespace DNSInfo
 					return await new NullRequestResolver().Resolve(request);
 				}
 				var clientResponse = new ClientResponse(request, response, buffer);
-				_iResponse = clientResponse;
+				_clientResponse = clientResponse;
 				return clientResponse;
 			}
 		}
 
-		private IResponse _iResponse = null;
+		private IResponse _clientResponse = null;
 		private void button1_Click(object sender, EventArgs e)
 		{
 			try
@@ -195,7 +185,18 @@ namespace DNSInfo
 				textBox1.Text = string.Empty;
 				var querystr = textBox3.Text;
 				var type = GetRecordType();
-				var dnsS = Common.ToIPEndPoints(textBox2.Text, 53, new[] { ',' ,'，'}) as IPEndPoint[];
+
+				if (type == RecordType.PTR)
+				{
+					querystr = Common.IPStr2PTRName(querystr);
+				}
+
+				if (string.IsNullOrWhiteSpace(querystr))
+				{
+					throw new IOException(@"Domain Error!");
+				}
+
+				var dnsS = Common.ToIPEndPoints(textBox2.Text, 53, new[] { ',', '，' }) as IPEndPoint[];
 				if (dnsS.Length == 0)
 				{
 					throw new Exception(DnsServerError);
@@ -228,7 +229,7 @@ namespace DNSInfo
 						else
 						{
 							latency += stopwatch.Elapsed.TotalMilliseconds;
-							text = Response2String(_iResponse, request, dns);
+							text = Response2String(_clientResponse, dns);
 							if (text[0] != '*')
 							{
 								isover = true;

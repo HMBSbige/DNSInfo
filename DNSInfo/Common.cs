@@ -14,6 +14,16 @@ namespace DNSInfo
 			return IPAddress.Parse($@"{s[3]}.{s[2]}.{s[1]}.{s[0]}");
 		}
 
+		public static string IPStr2PTRName(string str)
+		{
+			if (!IsIPv4Address(str))
+			{
+				return string.Empty;
+			}
+			var s = str.Split('.');
+			return $@"{s[3]}.{s[2]}.{s[1]}.{s[0]}.in-addr.arpa";
+		}
+
 		private static readonly Regex Ipv4Pattern = new Regex("^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){1}(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){2}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$");
 
 		public static bool IsIPv4Address(string input)

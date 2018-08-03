@@ -100,12 +100,8 @@
 			this.comboBox1.Items.AddRange(new object[] {
             "IPv4 host address (A)",
             "IPv6 host address (AAAA)",
-            "Name server (NS)",
             "Canonical name (CNAME)",
-            "Domain name pointer (PTR)",
-            "Mail exchange (MX)",
-            "Text entries (TXT)",
-            "Any record (ANY)"});
+            "Domain name pointer (PTR)"});
 			this.comboBox1.Location = new System.Drawing.Point(279, 270);
 			this.comboBox1.Name = "comboBox1";
 			this.comboBox1.Size = new System.Drawing.Size(187, 20);
