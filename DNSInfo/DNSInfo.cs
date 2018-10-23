@@ -1,4 +1,9 @@
-﻿using System;
+﻿using DNS.Client;
+using DNS.Client.RequestResolver;
+using DNS.Protocol;
+using DNS.Protocol.ResourceRecords;
+using DNS.Protocol.Utils;
+using System;
 using System.Diagnostics;
 using System.IO;
 using System.Net;
@@ -6,11 +11,6 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using DNS.Client;
-using DNS.Client.RequestResolver;
-using DNS.Protocol;
-using DNS.Protocol.ResourceRecords;
-using DNS.Protocol.Utils;
 
 namespace DNSInfo
 {
@@ -151,7 +151,7 @@ namespace DNSInfo
 			return resStr.ToString();
 		}
 
-		private async Task<IResponse> Query(IPEndPoint dns, IRequest request, int timeout = DefaultTimeout)
+		private static async Task<IResponse> Query(IPEndPoint dns, IRequest request, int timeout = DefaultTimeout)
 		{
 			using (var udp = new UdpClient())
 			{
@@ -171,12 +171,10 @@ namespace DNSInfo
 					return await new NullRequestResolver().Resolve(request);
 				}
 				var clientResponse = new ClientResponse(request, response, buffer);
-				_clientResponse = clientResponse;
 				return clientResponse;
 			}
 		}
 
-		private IResponse _clientResponse = null;
 		private void button1_Click(object sender, EventArgs e)
 		{
 			try
@@ -209,13 +207,14 @@ namespace DNSInfo
 					{
 						var isover = false;
 						var request = GetRequest(dns, type, querystr);
+						IResponse clientResponse = null;
 						var istimeout = false;
 
 						var stopwatch = new Stopwatch();
 						stopwatch.Start();
 						try
 						{
-							Query(dns, request).Wait();
+							clientResponse = Task.Run(() => Query(dns, request)).GetAwaiter().GetResult();
 						}
 						catch
 						{
@@ -229,7 +228,7 @@ namespace DNSInfo
 						else
 						{
 							latency += stopwatch.Elapsed.TotalMilliseconds;
-							text = Response2String(_clientResponse, dns);
+							text = Response2String(clientResponse, dns);
 							if (text[0] != '*')
 							{
 								isover = true;
