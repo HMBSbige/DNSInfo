@@ -7,6 +7,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ARSoft.Tools.Net", "ARSoft.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DNSInfo", "DNSInfo\DNSInfo.csproj", "{08858122-A401-476F-969E-2DA41C21A49F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTest", "UnitTest\UnitTest.csproj", "{30CE9FC2-BF49-4D4C-A25D-E18131E42147}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{08858122-A401-476F-969E-2DA41C21A49F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{08858122-A401-476F-969E-2DA41C21A49F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{08858122-A401-476F-969E-2DA41C21A49F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{30CE9FC2-BF49-4D4C-A25D-E18131E42147}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{30CE9FC2-BF49-4D4C-A25D-E18131E42147}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{30CE9FC2-BF49-4D4C-A25D-E18131E42147}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{30CE9FC2-BF49-4D4C-A25D-E18131E42147}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
