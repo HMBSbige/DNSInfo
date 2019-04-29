@@ -29,24 +29,9 @@ namespace DNSInfo.Utils
 
 		public static bool IsSupportDnsSec(DomainName domain)
 		{
-			var dnsClient = new DnsClient(IPAddress.Parse(@"1.1.1.1"), 10000);
-
-			var options = new DnsQueryOptions
-			{
-				IsRecursionDesired = true,
-				IsCheckingDisabled = false,
-				IsEDnsEnabled = true,
-				IsDnsSecOk = true,
-			};
-
-			var dnsMessage = dnsClient.Resolve(domain, RecordType.A, RecordClass.INet, options);
-
-			if (dnsMessage == null || dnsMessage.ReturnCode != ReturnCode.NoError && dnsMessage.ReturnCode != ReturnCode.NxDomain)
-			{
-				return false;
-			}
-
-			return dnsMessage.IsAuthenticData && dnsMessage.IsDnsSecOk;
+			IDnsSecResolver resolver = new SelfValidatingInternalDnsSecStubResolver();
+			var result = resolver.ResolveSecure<SshFpRecord>(domain, RecordType.SshFp);
+			return result.ValidationResult == DnsSecValidationResult.Signed;
 		}
 
 		public static bool IsSupportEcs(IPEndPoint dns)

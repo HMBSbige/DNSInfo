@@ -24,10 +24,14 @@ namespace UnitTest
 		{
 			var supportedDomain1 = DomainName.Parse(@"pir.org");
 			var supportedDomain2 = DomainName.Parse(@"www.isoc.org");
-			var unsupportedDomain = DomainName.Parse(@"www.google.com");
+			var supportedDomain3 = DomainName.Parse(@"paypal.com");
+			var unsupportedDomain1 = DomainName.Parse(@"www.google.com");
+			var unsupportedDomain2 = DomainName.Parse(@"www.bing.com");
 			Assert.IsTrue(DnsValidation.IsSupportDnsSec(supportedDomain1));
 			Assert.IsTrue(DnsValidation.IsSupportDnsSec(supportedDomain2));
-			Assert.IsFalse(DnsValidation.IsSupportDnsSec(unsupportedDomain));
+			Assert.IsTrue(DnsValidation.IsSupportDnsSec(supportedDomain3));
+			Assert.IsFalse(DnsValidation.IsSupportDnsSec(unsupportedDomain1));
+			Assert.IsFalse(DnsValidation.IsSupportDnsSec(unsupportedDomain2));
 		}
 
 		[TestMethod]
