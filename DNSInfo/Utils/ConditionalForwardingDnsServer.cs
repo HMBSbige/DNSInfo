@@ -1,5 +1,6 @@
 ﻿using ARSoft.Tools.Net;
 using ARSoft.Tools.Net.Dns;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -15,7 +16,8 @@ namespace DNSInfo.Utils
 
 		private readonly HashSet<DomainName> domains = new HashSet<DomainName>();
 
-		private readonly IEnumerable<string> specialDomains = new List<string> { @"in-addr.arpa", @"lan", @"local", @"localdomain" };
+		private readonly IEnumerable<string> specialDomains = new List<string> { @"lan", @"local", @"localdomain" };
+		private readonly IEnumerable<string> ptrDomains = new List<string> { @"in-addr.arpa" };
 
 		#endregion
 
@@ -30,7 +32,6 @@ namespace DNSInfo.Utils
 		public ClientSubnetOption PureEcs;
 
 		#endregion
-
 
 		#region 构造函数
 
@@ -50,6 +51,7 @@ namespace DNSInfo.Utils
 			UpStreamEcs = null;
 			PureEcs = null;
 			LoadDomains(specialDomains);
+			LoadDomains(ptrDomains);
 			QueryReceived += OnQueryReceived;
 		}
 
@@ -81,11 +83,16 @@ namespace DNSInfo.Utils
 			return false;
 		}
 
+		private bool IsLocal(DomainName name)
+		{
+			return specialDomains.Any(domain => name.IsEqualOrSubDomainOf(DomainName.Parse(domain)));
+		}
+
 		#endregion
 
-		private static bool ExistEcs(IEnumerable<EDnsOptionBase> options)
+		private static bool ExistEcs(OptRecord eDnsOptions)
 		{
-			return options.OfType<ClientSubnetOption>().Any();
+			return eDnsOptions?.Options != null && eDnsOptions.Options.OfType<ClientSubnetOption>().Any();
 		}
 
 		private async Task OnQueryReceived(object sender, QueryReceivedEventArgs e)
@@ -103,7 +110,7 @@ namespace DNSInfo.Utils
 						IsRecursionDesired = true
 					};
 
-					var existEcs = ExistEcs(message.EDnsOptions.Options);
+					var existEcs = ExistEcs(message.EDnsOptions);
 					if (existEcs)
 					{
 						foreach (var option in message.EDnsOptions.Options)
@@ -113,20 +120,41 @@ namespace DNSInfo.Utils
 					}
 
 					var question = message.Questions[0];
-					if (IsOnList(question.Name))
+					Console.WriteLine($@"DNS query: {question.Name}");
+					if (IsLocal(question.Name))
+					{
+						response.ReturnCode = ReturnCode.NxDomain;
+						e.Response = response;
+						return;
+					}
+					else if (IsOnList(question.Name))
 					{
 						dnsClient = UpStreamDns;
-						if (!existEcs && UpStreamEcs != null)
+						if (!existEcs)
 						{
-							options.EDnsOptions.Options.Add(UpStreamEcs);
+							if (UpStreamEcs != null)
+							{
+								options.EDnsOptions.Options.Add(UpStreamEcs);
+							}
+							else //if (question.RecordType != RecordType.Ptr)
+							{
+								options.EDnsOptions.Options.Add(new ClientSubnetOption(32, e.RemoteEndpoint.Address));
+							}
 						}
 					}
 					else
 					{
 						dnsClient = PureDns;
-						if (!existEcs && PureEcs != null)
+						if (!existEcs)
 						{
-							options.EDnsOptions.Options.Add(PureEcs);
+							if (PureEcs != null)
+							{
+								options.EDnsOptions.Options.Add(PureEcs);
+							}
+							else //if (question.RecordType != RecordType.Ptr)
+							{
+								options.EDnsOptions.Options.Add(new ClientSubnetOption(32, e.RemoteEndpoint.Address));
+							}
 						}
 					}
 
@@ -146,11 +174,12 @@ namespace DNSInfo.Utils
 							response.AdditionalRecords.Add(record);
 						}
 
-						response.EDnsOptions = upstreamResponse.EDnsOptions;
+						//if (existEcs)
+						{
+							response.EDnsOptions = upstreamResponse.EDnsOptions;
+						}
 
 						response.ReturnCode = ReturnCode.NoError;
-
-						// set the response
 						e.Response = response;
 					}
 				}

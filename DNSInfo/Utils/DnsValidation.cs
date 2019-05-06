@@ -1,5 +1,7 @@
 ﻿using ARSoft.Tools.Net;
 using ARSoft.Tools.Net.Dns;
+using System;
+using System.Collections.Generic;
 using System.Net;
 
 namespace DNSInfo.Utils
@@ -65,6 +67,29 @@ namespace DNSInfo.Utils
 			}
 
 			return false;
+		}
+
+		private const string PollutedListUrl = @"https://raw.githubusercontent.com/HMBSbige/Text_Translation/master/PollutedIPv4.txt";
+
+		private static HashSet<IPAddress> _pollutedIp;
+
+		public static bool IsPoison(IPAddress ip)
+		{
+			if (_pollutedIp == null)
+			{
+				_pollutedIp = new HashSet<IPAddress>();
+				using var client = new WebClient();
+				var str = client.DownloadString(PollutedListUrl);
+				var ips = str.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.RemoveEmptyEntries);
+				foreach (var s in ips)
+				{
+					if (IPAddress.TryParse(s, out var outIp))
+					{
+						_pollutedIp.Add(outIp);
+					}
+				}
+			}
+			return _pollutedIp.Contains(ip);
 		}
 	}
 }

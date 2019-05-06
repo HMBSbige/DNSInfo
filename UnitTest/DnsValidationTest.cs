@@ -41,5 +41,14 @@ namespace UnitTest
 			Assert.IsFalse(DnsValidation.IsSupportEcs(cloudflareDns));
 			Assert.IsTrue(DnsValidation.IsSupportEcs(dnspod));
 		}
+
+		[TestMethod]
+		public void PoisonTest()
+		{
+			var pollutedIp1 = IPAddress.Parse(@"88.191.249.183");
+			var normalIp = IPAddress.Parse(@"172.217.5.68");
+			Assert.IsTrue(DnsValidation.IsPoison(pollutedIp1));
+			Assert.IsFalse(DnsValidation.IsPoison(normalIp));
+		}
 	}
 }
