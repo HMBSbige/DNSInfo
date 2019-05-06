@@ -8,10 +8,8 @@ namespace DNSInfo.Utils
 {
 	public static class DnsValidation
 	{
-		public static bool IsSupportDnsSec(IPEndPoint dns)
+		public static bool IsSupportDnsSec(DnsClient dnsClient)
 		{
-			var dnsClient = new DnsClient(dns.Address, 10000, dns.Port);
-
 			var options = new DnsQueryOptions
 			{
 				IsRecursionDesired = true,
@@ -29,17 +27,19 @@ namespace DNSInfo.Utils
 			return dnsMessage.IsAuthenticData && dnsMessage.IsDnsSecOk;
 		}
 
-		public static bool IsSupportDnsSec(DomainName domain)
+		public static bool IsSupportDnsSec(DomainName domain, DnsClient dnsClient = null)
 		{
-			IDnsSecResolver resolver = new SelfValidatingInternalDnsSecStubResolver();
+			IDnsSecResolver resolver = new SelfValidatingInternalDnsSecStubResolver(dnsClient);
 			var result = resolver.ResolveSecure<SshFpRecord>(domain, RecordType.SshFp);
 			return result.ValidationResult == DnsSecValidationResult.Signed;
 		}
 
-		public static bool IsSupportEcs(IPEndPoint dns)
+		public static bool IsSupportEcs(DnsClient dnsClient, ClientSubnetOption ecs = null)
 		{
-			var dnsClient = new DnsClient(dns.Address, 10000, dns.Port);
-			var ecs = new ClientSubnetOption(32, IPAddress.Parse(@"202.96.199.133"));
+			if (ecs == null)
+			{
+				ecs = new ClientSubnetOption(32, IPAddress.Parse(@"202.96.199.133"));
+			}
 
 			var options = new DnsQueryOptions
 			{
