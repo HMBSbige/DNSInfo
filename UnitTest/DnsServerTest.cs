@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace UnitTest
 {
@@ -20,8 +21,8 @@ namespace UnitTest
 			{
 				PureEcs = new ClientSubnetOption(32, IPAddress.Parse(@"38.143.0.121")),
 				UpStreamEcs = new ClientSubnetOption(32, IPAddress.Parse(@"202.96.199.133")),
-				PureDns = new DnsClient(IPAddress.Parse(@"123.206.209.64"), 3000, 5533),
-				UpStreamDns = new DnsClient(IPAddress.Parse(@"101.226.4.6"), 3000, 53)
+				PureDns = DnsValidationTest.tunaDns,
+				UpStreamDns = DnsValidationTest.paiDns
 			};
 			var list = new List<string>();
 			using (var sr = new StreamReader(path, Encoding.UTF8))
@@ -38,7 +39,18 @@ namespace UnitTest
 			}
 			server.LoadDomains(list);
 			server.Start();
-			Console.ReadLine();
+			Task.Delay(1000).Wait();
+			var client = new DnsClient(IPAddress.Loopback, 10000);
+			Assert.IsTrue(DnsValidation.IsSupportDnsSec(client));
+			Assert.IsTrue(DnsValidation.IsSupportEcs(client));
+
+			IDnsResolver resolver = new DnsStubResolver(client);
+			var addresses = resolver.ResolveHost(@"www.google.com");
+			foreach (var ipAddress in addresses)
+			{
+				Console.WriteLine(ipAddress.ToString());
+				Assert.IsFalse(DnsValidation.IsPoison(ipAddress));
+			}
 		}
 	}
 }

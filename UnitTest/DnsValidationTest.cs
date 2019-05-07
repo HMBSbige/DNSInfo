@@ -9,11 +9,12 @@ namespace UnitTest
 	[TestClass]
 	public class DnsValidationTest
 	{
-		private readonly DnsClient googleDns = new DnsClient(IPAddress.Parse(@"8.8.8.8"), 10000);
-		private readonly DnsClient cloudflareDns = new DnsClient(IPAddress.Parse(@"1.1.1.1"), 10000);
-		private readonly DnsClient dnspod = new DnsClient(IPAddress.Parse(@"119.29.29.29"), 10000);
-		private readonly DnsClient lugDns = new DnsClient(IPAddress.Parse(@"202.141.162.123"), 10000, 5353);
-		private readonly DnsClient tunaDns = new DnsClient(IPAddress.Parse(@"101.6.6.6"), 10000, 5353);
+		public static readonly DnsClient googleDns = new DnsClient(IPAddress.Parse(@"8.8.8.8"), 10000);
+		public static readonly DnsClient cloudflareDns = new DnsClient(IPAddress.Parse(@"1.1.1.1"), 10000);
+		public static readonly DnsClient dnspod = new DnsClient(IPAddress.Parse(@"119.29.29.29"), 10000);
+		public static readonly DnsClient lugDns = new DnsClient(IPAddress.Parse(@"202.141.162.123"), 10000, 5353);
+		public static readonly DnsClient tunaDns = new DnsClient(IPAddress.Parse(@"101.6.6.6"), 10000, 5353);
+		public static readonly DnsClient paiDns = new DnsClient(IPAddress.Parse(@"101.226.4.6"), 10000);
 
 		[TestMethod]
 		public void DnsServerDnsSecTest()
@@ -23,13 +24,13 @@ namespace UnitTest
 			Assert.IsFalse(DnsValidation.IsSupportDnsSec(dnspod));
 			Assert.IsFalse(DnsValidation.IsSupportDnsSec(lugDns));
 			Assert.IsTrue(DnsValidation.IsSupportDnsSec(tunaDns));
+			Assert.IsFalse(DnsValidation.IsSupportDnsSec(paiDns));
 		}
 
 		[TestMethod]
 		public void DomainDnsSecTest()
 		{
-			var dnsClient = lugDns;
-			dnsClient.IsUdpEnabled = false;
+			var dnsClient = tunaDns;
 			var supportedDomain1 = DomainName.Parse(@"pir.org");
 			var supportedDomain2 = DomainName.Parse(@"www.isoc.org");
 			var supportedDomain3 = DomainName.Parse(@"paypal.com");
@@ -51,6 +52,7 @@ namespace UnitTest
 			Assert.IsTrue(DnsValidation.IsSupportEcs(dnspod));
 			Assert.IsFalse(DnsValidation.IsSupportEcs(lugDns));
 			Assert.IsTrue(DnsValidation.IsSupportEcs(tunaDns));
+			Assert.IsTrue(DnsValidation.IsSupportEcs(paiDns));
 		}
 
 		[TestMethod]

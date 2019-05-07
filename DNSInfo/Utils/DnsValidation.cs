@@ -24,7 +24,7 @@ namespace DNSInfo.Utils
 			{
 				return false;
 			}
-			return dnsMessage.IsAuthenticData && dnsMessage.IsDnsSecOk;
+			return dnsMessage.IsAuthenticData/* && dnsMessage.IsDnsSecOk*/;
 		}
 
 		public static bool IsSupportDnsSec(DomainName domain, DnsClient dnsClient = null)
